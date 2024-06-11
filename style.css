@@ -3,7 +3,7 @@
 }
 
 .custom-navbar {
-    background-color: #b42f2f;
+    background-color: #7C3030;
     /* Custom dark red color */
 }
 
@@ -31,7 +31,7 @@
 }
 
 .section-red {
-    background-color: #b42f2f;
+    background-color: #7C3030;
     color: white;
     padding: 50px 0;
     margin-top: 0;
@@ -79,7 +79,7 @@
 /* Section 2 Styles */
 .section-2 {
     padding: 70px 0;
-    background-color: #e5da98;
+    background-color: #e5ce98;
     color: white;
 
 }
@@ -104,7 +104,7 @@
 
 .section-2 button:hover {
     background-color: #808080;
-    color: #b42f2f;
+    color: #A95C68;
 
 }
 
@@ -128,7 +128,7 @@
 
 .section-2 .card:hover {
     transform: translateY(-5px);
-    background-color: #b42f2f;
+    background-color: #A95C68;
 }
 
 .row-cols-md-3>.col {
@@ -146,7 +146,7 @@
 .section-3 .card {
     background-color: transparent;
     border: none;
-    margin-top: 25px;
+    margin-top: 45px;
     margin-bottom: 20px;
     border-radius: 10px;
     transition: all 0.3s ease;
@@ -157,6 +157,7 @@
     height: auto;
     border-radius: 10px;
 }
+
 .section-3 h5 {
     font-size: 14px;
 }
@@ -165,6 +166,7 @@
     transform: translateY(-5px);
     background-color: #5755551f;
 }
+
 .section-heading {
     margin: 0;
     color: #000;
@@ -172,5 +174,67 @@
 
 .view-all {
     text-decoration: underline;
-    color: #2c2626; 
+    color: #2c2626;
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+    /* Divider line */
+    background-color: #7C3030;
+}
+
+.footer-left {
+    flex: 1;
+    width: 20%;
+    /* Set the width to 20% */
+}
+
+.footer-right {
+    flex: 4;
+    /* Adjust this value as needed */
+    margin-left: 20px;
+    /* Add some spacing between left and right sections */
+}
+
+.footer-left h1,
+.footer-left p {
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.725);
+    ;
+}
+
+.footer-left i {
+    margin-right: 10px;
+    font-size: 24px;
+}
+
+.table-danger {
+    border-collapse: separate;
+    border-spacing: 20px;
+    /* Adjust the spacing as needed */
+}
+
+.table-danger td {
+    border: none;
+    padding: 15px;
+    /* Add padding to cells */
+    background-color: #7C3030;
+}
+
+/* Style for the divider line */
+footer divider {
+    width: 1px;
+    height: 100%;
+    background-color: #ff0000;
+    margin: 0 20px;
+}
+
+/* Footer links alignment */
+footer a {
+    margin-right: 10px;
+    text-decoration: none;
 }
