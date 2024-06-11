@@ -182,12 +182,18 @@
 }
 
 footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     padding: 20px;
     border-top: 1px solid #ccc;
     background-color: #7C3030;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
 }
 
 .footer-left {
@@ -213,12 +219,12 @@ footer {
 
 .table-danger {
     border-collapse: separate;
-    border-spacing: 20px;
+    border-spacing: 5px;
 }
 
 .table-danger td {
     border: none;
-    padding: 15px;
+    padding: 5px;
     background-color: #7C3030;
     color: rgb(208, 208, 208);
 }
@@ -233,4 +239,22 @@ footer divider {
 footer a {
     margin-right: 10px;
     text-decoration: none;
+    color: rgba(255, 255, 255, 0.725); /* Ensure links are visible */
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.3); /* Optional: Add a border to separate from the content above */
+    padding-top: 10px; /* Add some padding to the top */
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.725); /* Same color as other text */
+}
+
+.footer-bottom a {
+    margin-left: 20px; /* Add some space between the links */
 }
