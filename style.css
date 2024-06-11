@@ -4,30 +4,24 @@
 
 .custom-navbar {
     background-color: #7C3030;
-    /* Custom dark red color */
 }
 
 .custom-navbar .nav-link {
     color: #808080 !important;
-    /* Gray text color */
 }
 
 .custom-navbar .navbar-brand {
     color: #fff !important;
-    /* White text color */
 }
 
 .custom-navbar .nav-link:hover,
 .custom-navbar .navbar-brand:hover {
     color: #ffcccb !important;
-    /* Light red text color on hover */
 }
 
 .custom-navbar .nav-link.active {
     border-bottom: 2px solid #fff;
-    /* White bottom border for active nav link */
     color: #fff !important;
-    /* White text color for active nav link */
 }
 
 .section-red {
@@ -45,7 +39,7 @@
 }
 
 .section-red h1 {
-    font-size: 46px
+    font-size: 46px;
 }
 
 .section-red p {
@@ -55,9 +49,7 @@
 .section-red .text-container {
     padding: 20px;
     max-width: 500px;
-    /* Limit the width of the text container */
     margin: 0 auto;
-    /* Center the text container */
 }
 
 .section-red .btn-outline-danger {
@@ -73,7 +65,6 @@
 .section-red .btn-outline-danger:hover {
     background-color: white;
     color: #ff4c4c;
-
 }
 
 /* Section 2 Styles */
@@ -81,13 +72,11 @@
     padding: 70px 0;
     background-color: #e5ce98;
     color: white;
-
 }
 
 .section-2 h2 {
     color: #b42f2f;
     text-align: left;
-
 }
 
 .section-2 p {
@@ -98,14 +87,11 @@
     border-radius: 20px;
     background-color: #b42f2f;
     color: #fff;
-
-
 }
 
 .section-2 button:hover {
     background-color: #808080;
     color: #A95C68;
-
 }
 
 .section-2 .card {
@@ -118,6 +104,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .section-2 .card img {
@@ -131,15 +118,31 @@
     background-color: #A95C68;
 }
 
+.section-2 .card .plus {
+    color: #e5ce98;
+    padding: 3%;
+    background-color: black;
+    border-radius: 50%; 
+    opacity: 0;
+    position: absolute;
+    bottom: -25px; 
+    margin-top: -10px; 
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.3s ease;
+}
+
+.section-2 .card:hover .plus {
+    opacity: 1;
+}
+
 .row-cols-md-3>.col {
     flex: 0 0 30.33333%;
-    /* Ensure equal width for each card */
     max-width: 30.33333%;
-    /* Ensure equal width for each card */
 }
 
 .section-3 {
-    background-color: #e5da98;
+    background-color: #e5ce98;
     padding: 50px 0;
 }
 
@@ -151,6 +154,7 @@
     border-radius: 10px;
     transition: all 0.3s ease;
 }
+
 
 .section-3 .card img {
     width: 100%;
@@ -183,28 +187,23 @@ footer {
     align-items: flex-start;
     padding: 20px;
     border-top: 1px solid #ccc;
-    /* Divider line */
     background-color: #7C3030;
 }
 
 .footer-left {
     flex: 1;
     width: 20%;
-    /* Set the width to 20% */
 }
 
 .footer-right {
     flex: 4;
-    /* Adjust this value as needed */
     margin-left: 20px;
-    /* Add some spacing between left and right sections */
 }
 
 .footer-left h1,
 .footer-left p {
     margin-bottom: 20px;
     color: rgba(255, 255, 255, 0.725);
-    ;
 }
 
 .footer-left i {
@@ -215,25 +214,22 @@ footer {
 .table-danger {
     border-collapse: separate;
     border-spacing: 20px;
-    /* Adjust the spacing as needed */
 }
 
 .table-danger td {
     border: none;
     padding: 15px;
-    /* Add padding to cells */
     background-color: #7C3030;
+    color: rgb(208, 208, 208);
 }
 
-/* Style for the divider line */
 footer divider {
     width: 1px;
     height: 100%;
-    background-color: #ff0000;
+    background-color: #141414;
     margin: 0 20px;
 }
 
-/* Footer links alignment */
 footer a {
     margin-right: 10px;
     text-decoration: none;
