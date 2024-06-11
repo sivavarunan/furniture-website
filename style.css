@@ -1,5 +1,5 @@
-.brand-furni {
-    color: rgb(52, 51, 51);
+.navbar-brand .brand {
+    color: rgba(148, 148, 148, 0.762);
 }
 
 .custom-navbar {
@@ -44,6 +44,10 @@
     border-radius: 20px;
 }
 
+.section-red h1 {
+    font-size: 46px
+}
+
 .section-red p {
     text-align: justify;
 }
@@ -62,6 +66,10 @@
     border-radius: 20px;
 }
 
+.section-red .btn-light {
+    color: black;
+}
+
 .section-red .btn-outline-danger:hover {
     background-color: white;
     color: #ff4c4c;
@@ -70,14 +78,34 @@
 
 /* Section 2 Styles */
 .section-2 {
-    padding: 50px 0;
+    padding: 70px 0;
     background-color: #e5da98;
     color: white;
 
 }
 
+.section-2 h2 {
+    color: #b42f2f;
+    text-align: left;
+
+}
+
 .section-2 p {
     text-align: justify;
+}
+
+.section-2 button {
+    border-radius: 20px;
+    background-color: #b42f2f;
+    color: #fff;
+
+
+}
+
+.section-2 button:hover {
+    background-color: #808080;
+    color: #b42f2f;
+
 }
 
 .section-2 .card {
@@ -104,8 +132,45 @@
 }
 
 .row-cols-md-3>.col {
-    flex: 0 0 33.33333%;
+    flex: 0 0 30.33333%;
     /* Ensure equal width for each card */
-    max-width: 33.33333%;
+    max-width: 30.33333%;
     /* Ensure equal width for each card */
+}
+
+.section-3 {
+    background-color: #e5da98;
+    padding: 50px 0;
+}
+
+.section-3 .card {
+    background-color: transparent;
+    border: none;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.section-3 .card img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+.section-3 h5 {
+    font-size: 14px;
+}
+
+.section-3 .card:hover {
+    transform: translateY(-5px);
+    background-color: #5755551f;
+}
+.section-heading {
+    margin: 0;
+    color: #000;
+}
+
+.view-all {
+    text-decoration: underline;
+    color: #2c2626; 
 }
