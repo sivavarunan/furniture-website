@@ -2,6 +2,18 @@
    FurniFrenzy — frontend app
    ============================================================ */
 
+// ---------- Page loader ----------
+const _loaderStart = Date.now();
+const _hideLoader = () => {
+    const el = document.getElementById('pageLoader');
+    if (!el || el.classList.contains('loaded')) return;
+    const elapsed = Date.now() - _loaderStart;
+    const delay = Math.max(0, 700 - elapsed); // show for at least 700ms
+    setTimeout(() => el.classList.add('loaded'), delay);
+};
+window.addEventListener('load', _hideLoader);
+setTimeout(_hideLoader, 5000); // hard fallback
+
 const API = '';
 const LS_TOKEN = 'ff_token';
 const LS_USER  = 'ff_user';
@@ -68,13 +80,28 @@ function toast(message, type = 'info') {
 }
 
 // ---------- Products ----------
+function renderProductSkeletons() {
+    $('#productsGrid').innerHTML = [1, 2, 3].map(() => `
+        <div class="col-md-4 col-sm-6">
+            <article class="product-card">
+                <div class="skel skel-media"></div>
+                <div class="product-info">
+                    <div class="skel skel-line" style="width:55%"></div>
+                    <div class="skel skel-line" style="width:80%"></div>
+                    <div class="skel skel-line" style="width:38%"></div>
+                </div>
+            </article>
+        </div>`).join('');
+}
+
 async function loadProducts() {
+    renderProductSkeletons();
     try {
         const { products } = await api('/api/products');
         state.products = products;
         renderProducts();
     } catch (e) {
-        $('#productsGrid').innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to load products: ${e.message}</div>`;
+        $('#productsGrid').innerHTML = `<div class="col-12 text-center text-danger py-5"><i class="fa-solid fa-circle-exclamation me-2"></i>Failed to load products: ${e.message}</div>`;
     }
 }
 
@@ -104,7 +131,7 @@ function renderProducts() {
                     <div class="product-media">
                         ${tagHtml}
                         <button class="wishlist" data-id="${p.id}" aria-label="Add to wishlist"><i class="fa-regular fa-heart"></i></button>
-                        <img src="${p.image}" alt="${p.name}">
+                        <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async">
                         <button class="quick-add" data-id="${p.id}"><i class="fa-solid fa-plus me-2"></i>Add to cart</button>
                     </div>
                     <div class="product-info">
@@ -119,7 +146,23 @@ function renderProducts() {
 }
 
 // ---------- Blog ----------
+function renderBlogSkeletons() {
+    $('#blogGrid').innerHTML = [1, 2, 3].map(() => `
+        <div class="col-md-4">
+            <article class="blog-card">
+                <div class="skel skel-blog-img"></div>
+                <div class="blog-body">
+                    <div class="skel skel-line" style="width:32%;margin-bottom:12px"></div>
+                    <div class="skel skel-line" style="width:90%;height:17px"></div>
+                    <div class="skel skel-line" style="width:65%;height:17px;margin-bottom:14px"></div>
+                    <div class="skel skel-line" style="width:42%"></div>
+                </div>
+            </article>
+        </div>`).join('');
+}
+
 async function loadBlog() {
+    renderBlogSkeletons();
     try {
         const { posts } = await api('/api/blog');
         const grid = $('#blogGrid');
@@ -127,7 +170,7 @@ async function loadBlog() {
             <div class="col-md-4">
                 <article class="blog-card reveal">
                     <div class="blog-media">
-                        <img src="${p.image}" alt="${p.title}">
+                        <img src="${p.image}" alt="${p.title}" loading="lazy" decoding="async">
                         <span class="blog-cat">${p.category}</span>
                     </div>
                     <div class="blog-body">

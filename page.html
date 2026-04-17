@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FurniFrenzy — Modern interior design studio & premium furniture collection.">
+    <meta name="theme-color" content="#FAF6F0">
+    <meta property="og:title" content="FurniFrenzy — Modern Furniture & Interior Design">
+    <meta property="og:description" content="Transform your home with timeless furniture and expert interior design.">
+    <meta property="og:type" content="website">
     <title>FurniFrenzy — Modern Furniture & Interior Design</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +24,15 @@
 </head>
 
 <body>
+    <!-- Page Loader -->
+    <div id="pageLoader" role="status" aria-label="Loading FurniFrenzy">
+        <div class="loader-inner">
+            <div class="loader-logo">Furni<span>Frenzy</span></div>
+            <div class="loader-track"><div class="loader-fill"></div></div>
+            <p class="loader-hint">Curating your space…</p>
+        </div>
+    </div>
+
     <!-- Announcement Bar -->
     <div class="announcement-bar">
         <div class="container d-flex justify-content-between align-items-center">
@@ -92,7 +105,7 @@
                 <div class="col-lg-6">
                     <div class="hero-image reveal">
                         <div class="hero-image-glow"></div>
-                        <img src="pic1.png" alt="Modern designer chair" class="img-fluid">
+                        <img src="pic1.png" alt="Modern designer chair" class="img-fluid" fetchpriority="high">
                         <div class="hero-badge">
                             <i class="fa-solid fa-leaf"></i>
                             <div>
@@ -177,10 +190,10 @@
                 <div class="col-lg-6">
                     <div class="about-gallery reveal">
                         <div class="about-img-wrap about-img-main">
-                            <img src="pic2.png" alt="Premium furniture collection">
+                            <img src="pic2.png" alt="Premium furniture collection" loading="lazy" decoding="async">
                         </div>
                         <div class="about-img-wrap about-img-secondary">
-                            <img src="pic3.png" alt="Handcrafted details">
+                            <img src="pic3.png" alt="Handcrafted details" loading="lazy" decoding="async">
                         </div>
                         <div class="about-badge">
                             <strong>15+</strong>
