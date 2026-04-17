@@ -24,7 +24,7 @@
     <div class="announcement-bar">
         <div class="container d-flex justify-content-between align-items-center">
             <span><i class="fa-solid fa-truck-fast me-2"></i>Free shipping on orders over $150</span>
-            <span class="d-none d-md-inline"><i class="fa-solid fa-phone me-2"></i>+1 (555) 010-2024</span>
+            <span class="d-none d-md-inline"><i class="fa-solid fa-phone me-2"></i>+94 076 8359459</span>
         </div>
     </div>
 
@@ -41,7 +41,7 @@
                     <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#section-2">Shop</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#features">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="#section-3">Blog</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" data-action="open-contact">Contact</a></li>
                 </ul>
@@ -149,6 +149,27 @@
         </div>
     </section>
 
+    <!-- Shop / Products -->
+    <section id="section-2" class="section-2">
+        <div class="container">
+            <div class="row align-items-start g-5" id="craft">
+                <div class="col-lg-4">
+                    <div class="section-intro reveal">
+                        <span class="eyebrow"><i class="fa-solid fa-sparkles me-2"></i>Our Collection</span>
+                        <h2>Crafted with <em>premium</em> material.</h2>
+                        <p>Experience unmatched quality with our furniture collection. Each piece is meticulously designed and built to perfection — elevating your space with timeless elegance and superior craftsmanship.</p>
+                        <a href="#section-2" class="btn btn-primary-custom">Explore all <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="row g-4" id="productsGrid">
+                        <div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading products…</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- About -->
     <section id="about" class="about-section">
         <div class="container">
@@ -196,28 +217,70 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="#section-2" class="btn btn-primary-custom mt-4">Shop the collection <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                        <a href="#services" class="btn btn-primary-custom mt-4">Our services <i class="fa-solid fa-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Craft / Products -->
-    <section id="section-2" class="section-2">
+    <!-- Services -->
+    <section id="services" class="services-section">
         <div class="container">
-            <div class="row align-items-start g-5" id="craft">
-                <div class="col-lg-4">
-                    <div class="section-intro reveal">
-                        <span class="eyebrow"><i class="fa-solid fa-hammer me-2"></i>Our Craft</span>
-                        <h2>Crafted with <em>premium</em> material.</h2>
-                        <p>Experience unmatched quality with our furniture collection. Each piece is meticulously designed and built to perfection — elevating your space with timeless elegance and superior craftsmanship.</p>
-                        <a href="#section-2" class="btn btn-primary-custom">Explore all <i class="fa-solid fa-arrow-right ms-2"></i></a>
+            <div class="row justify-content-center text-center mb-5">
+                <div class="col-lg-7 reveal">
+                    <span class="eyebrow eyebrow-light"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>What We Offer</span>
+                    <h2 class="services-heading">Everything your home <em>deserves</em></h2>
+                    <p class="services-sub">From a single statement piece to a full home transformation — we've got you covered at every step.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-ruler-combined"></i></div>
+                        <h5>Interior Design</h5>
+                        <p>One-on-one consultations with expert designers who turn your vision into a cohesive, stunning space.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
                     </div>
                 </div>
-                <div class="col-lg-8">
-                    <div class="row g-4" id="productsGrid">
-                        <div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading products…</div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <h5>Custom Furniture</h5>
+                        <p>Made-to-order pieces built precisely to your dimensions, finish, and fabric preferences.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                        <h5>White-Glove Delivery</h5>
+                        <p>Professional delivery team that assembles, positions, and removes all packaging — zero hassle.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-cube"></i></div>
+                        <h5>3D Space Planning</h5>
+                        <p>Visualise your room before committing. Photo-realistic renders so you know exactly what you'll get.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-house-circle-check"></i></div>
+                        <h5>Renovation Support</h5>
+                        <p>Full project management from demolition to styling — trusted contractors and on-site coordination.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card reveal">
+                        <div class="service-icon"><i class="fa-solid fa-life-ring"></i></div>
+                        <h5>After-Sales Care</h5>
+                        <p>Lifetime support, warranty repairs and dedicated aftercare so your pieces always look their best.</p>
+                        <a href="#" class="service-link">Learn more <i class="fa-solid fa-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>
