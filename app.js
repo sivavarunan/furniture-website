@@ -3,7 +3,7 @@
    Wires the static page to the Express + SQLite backend.
    ============================================================ */
 
-const API = ''; // same origin
+const API = ''; // same origin — backend features unavailable on static hosting
 const LS_TOKEN = 'ff_token';
 const LS_USER = 'ff_user';
 const LS_CART = 'ff_cart';
@@ -71,15 +71,23 @@ function toast(message, type = 'info') {
     }, 3200);
 }
 
+// ---------- Static data (replaces backend API for GitHub Pages hosting) ----------
+const STATIC_PRODUCTS = [
+    { id: 1, name: 'Modern Lounge Chair', slug: 'modern-lounge-chair', price: 220.00, old_price: 280.00, image: 'pic2.png', tag: 'New', rating: 4.6, rating_count: 128, stock: 24, category: 'Chairs' },
+    { id: 2, name: 'Designer Accent Chair', slug: 'designer-accent-chair', price: 185.00, old_price: 219.00, image: 'pic3.png', tag: 'Sale', rating: 5.0, rating_count: 94, stock: 18, category: 'Chairs' },
+    { id: 3, name: 'Premium Wooden Chair', slug: 'premium-wooden-chair', price: 249.00, old_price: null, image: 'pic4.png', tag: 'Hot', rating: 4.2, rating_count: 62, stock: 12, category: 'Chairs' },
+];
+
+const STATIC_BLOG = [
+    { id: 1, title: 'First Time Home Owner Ideas', image: 'pic6.jpg', category: 'Inspiration', author: 'Kristin Watson', published_at: '2021-12-19' },
+    { id: 2, title: 'How To Keep Your Furniture Clean', image: 'pic7.jpg', category: 'Guide', author: 'Robert Fox', published_at: '2021-12-15' },
+    { id: 3, title: 'Small Space Furniture Apartment Ideas', image: 'pic8.jpg', category: 'Tips', author: 'Kristin Watson', published_at: '2021-12-12' },
+];
+
 // ---------- Products ----------
 async function loadProducts() {
-    try {
-        const { products } = await api('/api/products');
-        state.products = products;
-        renderProducts();
-    } catch (e) {
-        $('#productsGrid').innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to load products: ${e.message}</div>`;
-    }
+    state.products = STATIC_PRODUCTS;
+    renderProducts();
 }
 
 function starHtml(rating) {
@@ -127,28 +135,23 @@ function renderProducts() {
 
 // ---------- Blog ----------
 async function loadBlog() {
-    try {
-        const { posts } = await api('/api/blog');
-        const grid = $('#blogGrid');
-        grid.innerHTML = posts.map(p => `
-            <div class="col-md-4">
-                <article class="blog-card reveal">
-                    <div class="blog-media">
-                        <img src="${p.image}" alt="${p.title}">
-                        <span class="blog-cat">${p.category}</span>
-                    </div>
-                    <div class="blog-body">
-                        <h5>${p.title}</h5>
-                        <p class="blog-meta">by ${p.author} · ${new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                        <a href="#" class="blog-link">Read article <i class="fa-solid fa-arrow-right ms-1"></i></a>
-                    </div>
-                </article>
-            </div>
-        `).join('');
-        observeReveals();
-    } catch (e) {
-        $('#blogGrid').innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to load articles.</div>`;
-    }
+    const grid = $('#blogGrid');
+    grid.innerHTML = STATIC_BLOG.map(p => `
+        <div class="col-md-4">
+            <article class="blog-card reveal">
+                <div class="blog-media">
+                    <img src="${p.image}" alt="${p.title}">
+                    <span class="blog-cat">${p.category}</span>
+                </div>
+                <div class="blog-body">
+                    <h5>${p.title}</h5>
+                    <p class="blog-meta">by ${p.author} · ${new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <a href="#" class="blog-link">Read article <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                </div>
+            </article>
+        </div>
+    `).join('');
+    observeReveals();
 }
 
 // ---------- Cart ----------
@@ -284,112 +287,42 @@ function renderUserNav() {
 
 // ---------- Forms ----------
 function bindForms() {
+    const DEMO_MSG = 'This feature requires the backend server. This is a static demo.';
+
     // Newsletter
-    $('#newsletterForm').addEventListener('submit', async (e) => {
+    $('#newsletterForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = e.target.email.value.trim();
-        const btn = e.target.querySelector('button');
-        const original = btn.textContent;
-        btn.disabled = true;
-        try {
-            const r = await api('/api/newsletter', { method: 'POST', body: { email } });
-            toast(r.message || 'Subscribed!', 'success');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Subscribed';
-            e.target.reset();
-            setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2500);
-        } catch (err) {
-            toast(err.message, 'error');
-            btn.disabled = false;
-        }
+        toast('Thanks for subscribing! (demo mode — no backend)', 'success');
+        e.target.reset();
     });
 
     // Login
-    $('#loginForm').addEventListener('submit', async (e) => {
+    $('#loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        try {
-            const data = await api('/api/auth/login', {
-                method: 'POST',
-                body: { email: e.target.email.value, password: e.target.password.value },
-            });
-            saveAuth(data.token, data.user);
-            closeAllModals();
-            toast(`Welcome back, ${data.user.name}`, 'success');
-        } catch (err) {
-            toast(err.message, 'error');
-        }
+        toast(DEMO_MSG, 'info');
     });
 
     // Register
-    $('#registerForm').addEventListener('submit', async (e) => {
+    $('#registerForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        try {
-            const data = await api('/api/auth/register', {
-                method: 'POST',
-                body: {
-                    name: e.target.name.value,
-                    email: e.target.email.value,
-                    password: e.target.password.value,
-                },
-            });
-            saveAuth(data.token, data.user);
-            closeAllModals();
-            toast(`Welcome, ${data.user.name}!`, 'success');
-        } catch (err) {
-            toast(err.message, 'error');
-        }
+        toast(DEMO_MSG, 'info');
     });
 
     // Contact
-    $('#contactForm').addEventListener('submit', async (e) => {
+    $('#contactForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        try {
-            const r = await api('/api/contact', {
-                method: 'POST',
-                body: {
-                    name: e.target.name.value,
-                    email: e.target.email.value,
-                    subject: e.target.subject.value,
-                    message: e.target.message.value,
-                },
-            });
-            toast(r.message, 'success');
-            e.target.reset();
-            closeAllModals();
-        } catch (err) {
-            toast(err.message, 'error');
-        }
+        toast('Message received! (demo mode — no backend)', 'success');
+        e.target.reset();
+        closeAllModals();
     });
 
     // Checkout
-    $('#checkoutForm').addEventListener('submit', async (e) => {
+    $('#checkoutForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        if (!state.token) {
-            closeAllModals();
-            openModal('authModal');
-            toast('Please sign in to place an order', 'info');
-            return;
-        }
-        try {
-            const r = await api('/api/orders', {
-                method: 'POST',
-                auth: true,
-                body: {
-                    items: state.cart,
-                    shipping: {
-                        name: e.target.name.value,
-                        address: e.target.address.value,
-                        city: e.target.city.value,
-                        zip: e.target.zip.value,
-                    },
-                },
-            });
-            state.cart = [];
-            saveCart();
-            closeAllModals();
-            toast(`Order #${r.orderId} placed — total ${fmt(r.total)}`, 'success');
-        } catch (err) {
-            toast(err.message, 'error');
-        }
+        state.cart = [];
+        saveCart();
+        closeAllModals();
+        toast('Order placed! (demo mode — no backend)', 'success');
     });
 
     // Auth tabs
@@ -476,28 +409,7 @@ function bindGlobalClicks() {
 
 async function loadOrders() {
     const list = $('#ordersList');
-    list.innerHTML = '<p class="muted">Loading…</p>';
-    try {
-        const { orders } = await api('/api/orders', { auth: true });
-        if (!orders.length) {
-            list.innerHTML = '<p class="muted">No orders yet.</p>';
-            return;
-        }
-        list.innerHTML = orders.map(o => `
-            <div class="order-card">
-                <div class="order-head">
-                    <strong>Order #${o.id}</strong>
-                    <span class="order-date">${new Date(o.created_at).toLocaleDateString()}</span>
-                </div>
-                <div class="order-items">
-                    ${o.items.map(it => `<div class="order-line"><img src="${it.image}" alt=""><span>${it.name} × ${it.quantity}</span><strong>${fmt(it.price * it.quantity)}</strong></div>`).join('')}
-                </div>
-                <div class="order-foot"><span>Total</span><strong>${fmt(o.total)}</strong></div>
-            </div>
-        `).join('');
-    } catch (e) {
-        list.innerHTML = `<p class="text-danger">${e.message}</p>`;
-    }
+    list.innerHTML = '<p class="muted">No orders yet.</p>';
 }
 
 // ---------- Reveal animations ----------
@@ -548,13 +460,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCart();
     loadBlog();
 
-    // Verify token still valid
-    if (state.token) {
-        try {
-            const { user } = await api('/api/auth/me', { auth: true });
-            saveAuth(state.token, user);
-        } catch {
-            logout();
-        }
-    }
+    // Token verification skipped — no backend available on static hosting
 });
