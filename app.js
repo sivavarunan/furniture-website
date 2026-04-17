@@ -1,19 +1,18 @@
 /* ============================================================
    FurniFrenzy — frontend app
-   Wires the static page to the Express + SQLite backend.
    ============================================================ */
 
-const API = ''; // same origin — backend features unavailable on static hosting
+const API = '';
 const LS_TOKEN = 'ff_token';
-const LS_USER = 'ff_user';
-const LS_CART = 'ff_cart';
+const LS_USER  = 'ff_user';
+const LS_CART  = 'ff_cart';
 
 // ---------- State ----------
 const state = {
-    token: localStorage.getItem(LS_TOKEN) || null,
-    user: JSON.parse(localStorage.getItem(LS_USER) || 'null'),
+    token:    localStorage.getItem(LS_TOKEN) || null,
+    user:     JSON.parse(localStorage.getItem(LS_USER) || 'null'),
     products: [],
-    cart: JSON.parse(localStorage.getItem(LS_CART) || '[]'),
+    cart:     JSON.parse(localStorage.getItem(LS_CART) || '[]'),
 };
 
 // ---------- Tiny helpers ----------
@@ -42,7 +41,7 @@ function saveCart() {
 
 function saveAuth(token, user) {
     state.token = token;
-    state.user = user;
+    state.user  = user;
     localStorage.setItem(LS_TOKEN, token);
     localStorage.setItem(LS_USER, JSON.stringify(user));
     renderUserNav();
@@ -50,7 +49,7 @@ function saveAuth(token, user) {
 
 function logout() {
     state.token = null;
-    state.user = null;
+    state.user  = null;
     localStorage.removeItem(LS_TOKEN);
     localStorage.removeItem(LS_USER);
     renderUserNav();
@@ -65,29 +64,18 @@ function toast(message, type = 'info') {
     el.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i><span>${message}</span>`;
     container.appendChild(el);
     requestAnimationFrame(() => el.classList.add('show'));
-    setTimeout(() => {
-        el.classList.remove('show');
-        setTimeout(() => el.remove(), 300);
-    }, 3200);
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3200);
 }
-
-// ---------- Static data (replaces backend API for GitHub Pages hosting) ----------
-const STATIC_PRODUCTS = [
-    { id: 1, name: 'Modern Lounge Chair', slug: 'modern-lounge-chair', price: 220.00, old_price: 280.00, image: 'pic2.png', tag: 'New', rating: 4.6, rating_count: 128, stock: 24, category: 'Chairs' },
-    { id: 2, name: 'Designer Accent Chair', slug: 'designer-accent-chair', price: 185.00, old_price: 219.00, image: 'pic3.png', tag: 'Sale', rating: 5.0, rating_count: 94, stock: 18, category: 'Chairs' },
-    { id: 3, name: 'Premium Wooden Chair', slug: 'premium-wooden-chair', price: 249.00, old_price: null, image: 'pic4.png', tag: 'Hot', rating: 4.2, rating_count: 62, stock: 12, category: 'Chairs' },
-];
-
-const STATIC_BLOG = [
-    { id: 1, title: 'First Time Home Owner Ideas', image: 'pic6.jpg', category: 'Inspiration', author: 'Kristin Watson', published_at: '2021-12-19' },
-    { id: 2, title: 'How To Keep Your Furniture Clean', image: 'pic7.jpg', category: 'Guide', author: 'Robert Fox', published_at: '2021-12-15' },
-    { id: 3, title: 'Small Space Furniture Apartment Ideas', image: 'pic8.jpg', category: 'Tips', author: 'Kristin Watson', published_at: '2021-12-12' },
-];
 
 // ---------- Products ----------
 async function loadProducts() {
-    state.products = STATIC_PRODUCTS;
-    renderProducts();
+    try {
+        const { products } = await api('/api/products');
+        state.products = products;
+        renderProducts();
+    } catch (e) {
+        $('#productsGrid').innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to load products: ${e.message}</div>`;
+    }
 }
 
 function starHtml(rating) {
@@ -108,7 +96,7 @@ function renderProducts() {
     }
     grid.innerHTML = state.products.map(p => {
         const tagClass = p.tag === 'Sale' ? 'tag-sale' : p.tag === 'Hot' ? 'tag-hot' : '';
-        const tagHtml = p.tag ? `<span class="product-tag ${tagClass}">${p.tag === 'Sale' ? '-15%' : p.tag}</span>` : '';
+        const tagHtml  = p.tag ? `<span class="product-tag ${tagClass}">${p.tag === 'Sale' ? '-15%' : p.tag}</span>` : '';
         const oldPrice = p.old_price ? `<span class="old-price">${fmt(p.old_price)}</span>` : '';
         return `
             <div class="col-md-4 col-sm-6">
@@ -120,10 +108,7 @@ function renderProducts() {
                         <button class="quick-add" data-id="${p.id}"><i class="fa-solid fa-plus me-2"></i>Add to cart</button>
                     </div>
                     <div class="product-info">
-                        <div class="product-rating">
-                            ${starHtml(p.rating)}
-                            <span>(${p.rating_count})</span>
-                        </div>
+                        <div class="product-rating">${starHtml(p.rating)}<span>(${p.rating_count})</span></div>
                         <h5>${p.name}</h5>
                         <p class="price">${fmt(p.price)} ${oldPrice}</p>
                     </div>
@@ -135,23 +120,28 @@ function renderProducts() {
 
 // ---------- Blog ----------
 async function loadBlog() {
-    const grid = $('#blogGrid');
-    grid.innerHTML = STATIC_BLOG.map(p => `
-        <div class="col-md-4">
-            <article class="blog-card reveal">
-                <div class="blog-media">
-                    <img src="${p.image}" alt="${p.title}">
-                    <span class="blog-cat">${p.category}</span>
-                </div>
-                <div class="blog-body">
-                    <h5>${p.title}</h5>
-                    <p class="blog-meta">by ${p.author} · ${new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    <a href="#" class="blog-link">Read article <i class="fa-solid fa-arrow-right ms-1"></i></a>
-                </div>
-            </article>
-        </div>
-    `).join('');
-    observeReveals();
+    try {
+        const { posts } = await api('/api/blog');
+        const grid = $('#blogGrid');
+        grid.innerHTML = posts.map(p => `
+            <div class="col-md-4">
+                <article class="blog-card reveal">
+                    <div class="blog-media">
+                        <img src="${p.image}" alt="${p.title}">
+                        <span class="blog-cat">${p.category}</span>
+                    </div>
+                    <div class="blog-body">
+                        <h5>${p.title}</h5>
+                        <p class="blog-meta">by ${p.author} · ${new Date(p.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                        <a href="#" class="blog-link">Read article <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </article>
+            </div>
+        `).join('');
+        observeReveals();
+    } catch {
+        $('#blogGrid').innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to load articles.</div>`;
+    }
 }
 
 // ---------- Cart ----------
@@ -179,21 +169,14 @@ function removeFromCart(productId) {
 }
 
 function cartItemsDetailed() {
-    return state.cart
-        .map(i => {
-            const p = state.products.find(p => p.id === i.id);
-            return p ? { ...p, quantity: i.quantity } : null;
-        })
-        .filter(Boolean);
+    return state.cart.map(i => {
+        const p = state.products.find(p => p.id === i.id);
+        return p ? { ...p, quantity: i.quantity } : null;
+    }).filter(Boolean);
 }
 
-function cartTotal() {
-    return cartItemsDetailed().reduce((s, i) => s + i.price * i.quantity, 0);
-}
-
-function cartCount() {
-    return state.cart.reduce((s, i) => s + i.quantity, 0);
-}
+function cartTotal()  { return cartItemsDetailed().reduce((s, i) => s + i.price * i.quantity, 0); }
+function cartCount()  { return state.cart.reduce((s, i) => s + i.quantity, 0); }
 
 function renderCartCount() {
     const el = $('#cartCount');
@@ -205,8 +188,8 @@ function renderCartCount() {
 }
 
 function renderCart() {
-    const items = cartItemsDetailed();
-    const body = $('#cartItems');
+    const items  = cartItemsDetailed();
+    const body   = $('#cartItems');
     const footer = $('#cartFooter');
     if (items.length === 0) {
         body.innerHTML = `
@@ -240,43 +223,24 @@ function renderCart() {
     const shipping = total >= 150 ? 0 : 12;
     $('#cartSubtotal').textContent = fmt(total);
     $('#cartShipping').textContent = shipping === 0 ? 'Free' : fmt(shipping);
-    $('#cartTotal').textContent = fmt(total + shipping);
+    $('#cartTotal').textContent    = fmt(total + shipping);
     footer.hidden = false;
 }
 
 // ---------- Drawer / modals ----------
-function openCart() {
-    $('#cartDrawer').classList.add('open');
-    $('#drawerOverlay').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-function closeCart() {
-    $('#cartDrawer').classList.remove('open');
-    $('#drawerOverlay').classList.remove('show');
-    document.body.style.overflow = '';
-}
-function openModal(id) {
-    $('#' + id).classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-function closeAllModals() {
-    $$('.modal-overlay').forEach(m => m.classList.remove('show'));
-    document.body.style.overflow = '';
-}
+function openCart()  { $('#cartDrawer').classList.add('open'); $('#drawerOverlay').classList.add('show'); document.body.style.overflow = 'hidden'; }
+function closeCart() { $('#cartDrawer').classList.remove('open'); $('#drawerOverlay').classList.remove('show'); document.body.style.overflow = ''; }
+function openModal(id) { $('#' + id).classList.add('show'); document.body.style.overflow = 'hidden'; }
+function closeAllModals() { $$('.modal-overlay').forEach(m => m.classList.remove('show')); document.body.style.overflow = ''; }
 
 // ---------- Auth UI ----------
 function renderUserNav() {
     const item = $('#userNavItem');
     if (state.user) {
         item.innerHTML = `
-            <a class="nav-link" href="#" data-action="user-menu" aria-label="Account">
-                <i class="fa-solid fa-circle-user"></i>
-            </a>
+            <a class="nav-link" href="#" data-action="user-menu" aria-label="Account"><i class="fa-solid fa-circle-user"></i></a>
             <div class="user-menu" id="userMenu" hidden>
-                <div class="user-menu-header">
-                    <strong>${state.user.name}</strong>
-                    <span>${state.user.email}</span>
-                </div>
+                <div class="user-menu-header"><strong>${state.user.name}</strong><span>${state.user.email}</span></div>
                 <button data-action="my-orders"><i class="fa-solid fa-box me-2"></i>My orders</button>
                 <button data-action="logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Sign out</button>
             </div>`;
@@ -287,51 +251,68 @@ function renderUserNav() {
 
 // ---------- Forms ----------
 function bindForms() {
-    const DEMO_MSG = 'This feature requires the backend server. This is a static demo.';
-
-    // Newsletter
-    $('#newsletterForm').addEventListener('submit', (e) => {
+    $('#newsletterForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        toast('Thanks for subscribing! (demo mode — no backend)', 'success');
-        e.target.reset();
+        const btn = e.target.querySelector('button');
+        const orig = btn.textContent;
+        btn.disabled = true;
+        try {
+            const r = await api('/api/newsletter', { method: 'POST', body: { email: e.target.email.value.trim() } });
+            toast(r.message || 'Subscribed!', 'success');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Subscribed';
+            e.target.reset();
+            setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+        } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
     });
 
-    // Login
-    $('#loginForm').addEventListener('submit', (e) => {
+    $('#loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        toast(DEMO_MSG, 'info');
+        try {
+            const data = await api('/api/auth/login', { method: 'POST', body: { email: e.target.email.value, password: e.target.password.value } });
+            saveAuth(data.token, data.user);
+            closeAllModals();
+            toast(`Welcome back, ${data.user.name}`, 'success');
+        } catch (err) { toast(err.message, 'error'); }
     });
 
-    // Register
-    $('#registerForm').addEventListener('submit', (e) => {
+    $('#registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        toast(DEMO_MSG, 'info');
+        try {
+            const data = await api('/api/auth/register', { method: 'POST', body: { name: e.target.name.value, email: e.target.email.value, password: e.target.password.value } });
+            saveAuth(data.token, data.user);
+            closeAllModals();
+            toast(`Welcome, ${data.user.name}!`, 'success');
+        } catch (err) { toast(err.message, 'error'); }
     });
 
-    // Contact
-    $('#contactForm').addEventListener('submit', (e) => {
+    $('#contactForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        toast('Message received! (demo mode — no backend)', 'success');
-        e.target.reset();
-        closeAllModals();
+        try {
+            const r = await api('/api/contact', { method: 'POST', body: { name: e.target.name.value, email: e.target.email.value, subject: e.target.subject.value, message: e.target.message.value } });
+            toast(r.message, 'success');
+            e.target.reset();
+            closeAllModals();
+        } catch (err) { toast(err.message, 'error'); }
     });
 
-    // Checkout
-    $('#checkoutForm').addEventListener('submit', (e) => {
+    $('#checkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        state.cart = [];
-        saveCart();
-        closeAllModals();
-        toast('Order placed! (demo mode — no backend)', 'success');
+        if (!state.token) { closeAllModals(); openModal('authModal'); toast('Please sign in to place an order', 'info'); return; }
+        try {
+            const r = await api('/api/orders', { method: 'POST', auth: true, body: { items: state.cart, shipping: { name: e.target.name.value, address: e.target.address.value, city: e.target.city.value, zip: e.target.zip.value } } });
+            state.cart = [];
+            saveCart();
+            closeAllModals();
+            toast(`Order #${r.orderId} placed — total ${fmt(r.total)}`, 'success');
+        } catch (err) { toast(err.message, 'error'); }
     });
 
-    // Auth tabs
     $$('.modal-tabs .tab').forEach(t => {
         t.addEventListener('click', () => {
             $$('.modal-tabs .tab').forEach(x => x.classList.remove('active'));
             t.classList.add('active');
             const which = t.dataset.tab;
-            $('#loginForm').hidden = which !== 'login';
+            $('#loginForm').hidden    = which !== 'login';
             $('#registerForm').hidden = which !== 'register';
         });
     });
@@ -340,9 +321,25 @@ function bindForms() {
 // ---------- Global click delegation ----------
 function bindGlobalClicks() {
     document.addEventListener('click', async (e) => {
+        // Quick-add (no data-action — must be checked before the data-action guard)
+        const quickAdd = e.target.closest('.quick-add');
+        if (quickAdd) {
+            const id = Number(quickAdd.dataset.id);
+            if (id) addToCart(id);
+            return;
+        }
+
+        // Wishlist toggle (same reason)
+        const wishlistBtn = e.target.closest('.wishlist');
+        if (wishlistBtn) {
+            wishlistBtn.querySelector('i').classList.toggle('fa-regular');
+            wishlistBtn.querySelector('i').classList.toggle('fa-solid');
+            toast('Wishlist updated', 'info');
+            return;
+        }
+
         const trg = e.target.closest('[data-action]');
         if (!trg) {
-            // Close user menu when clicking elsewhere
             const menu = $('#userMenu');
             if (menu && !e.target.closest('#userNavItem')) menu.hidden = true;
             return;
@@ -351,23 +348,16 @@ function bindGlobalClicks() {
         const id = trg.dataset.id ? Number(trg.dataset.id) : null;
 
         switch (action) {
-            case 'open-cart': e.preventDefault(); openCart(); break;
-            case 'close-cart': closeCart(); break;
+            case 'open-cart':    e.preventDefault(); openCart(); break;
+            case 'close-cart':   closeCart(); break;
             case 'open-auth':
                 e.preventDefault();
-                if (state.user) {
-                    const menu = $('#userMenu');
-                    if (menu) menu.hidden = !menu.hidden;
-                } else openModal('authModal');
+                if (state.user) { const m = $('#userMenu'); if (m) m.hidden = !m.hidden; }
+                else openModal('authModal');
                 break;
-            case 'user-menu': {
-                e.preventDefault();
-                const menu = $('#userMenu');
-                if (menu) menu.hidden = !menu.hidden;
-                break;
-            }
+            case 'user-menu': { e.preventDefault(); const m = $('#userMenu'); if (m) m.hidden = !m.hidden; break; }
             case 'open-contact': e.preventDefault(); closeAllModals(); openModal('contactModal'); break;
-            case 'close-modal': closeAllModals(); break;
+            case 'close-modal':  closeAllModals(); break;
             case 'checkout':
                 if (state.cart.length === 0) { toast('Your cart is empty', 'info'); return; }
                 if (!state.token) { closeCart(); openModal('authModal'); toast('Sign in to checkout', 'info'); return; }
@@ -375,10 +365,10 @@ function bindGlobalClicks() {
                 closeCart();
                 openModal('checkoutModal');
                 break;
-            case 'qty-plus': updateQty(id, +1); break;
-            case 'qty-minus': updateQty(id, -1); break;
-            case 'remove': removeFromCart(id); break;
-            case 'logout': logout(); closeAllModals(); break;
+            case 'qty-plus':  updateQty(id, +1); break;
+            case 'qty-minus':  updateQty(id, -1); break;
+            case 'remove':     removeFromCart(id); break;
+            case 'logout':     logout(); closeAllModals(); break;
             case 'my-orders':
                 e.preventDefault();
                 if (!state.token) { openModal('authModal'); return; }
@@ -386,30 +376,27 @@ function bindGlobalClicks() {
                 loadOrders();
                 break;
         }
-
-        // Wishlist toggle
-        if (trg.classList.contains('wishlist')) {
-            trg.querySelector('i').classList.toggle('fa-regular');
-            trg.querySelector('i').classList.toggle('fa-solid');
-            toast('Wishlist updated', 'info');
-        }
-        // Add to cart
-        if (trg.classList.contains('quick-add') && id) addToCart(id);
     });
 
-    // Close drawer/modal on overlay click
     $('#drawerOverlay').addEventListener('click', closeCart);
-    $$('.modal-overlay').forEach(m => {
-        m.addEventListener('click', (e) => { if (e.target === m) closeAllModals(); });
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeCart(); closeAllModals(); }
-    });
+    $$('.modal-overlay').forEach(m => { m.addEventListener('click', (e) => { if (e.target === m) closeAllModals(); }); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCart(); closeAllModals(); } });
 }
 
 async function loadOrders() {
     const list = $('#ordersList');
-    list.innerHTML = '<p class="muted">No orders yet.</p>';
+    list.innerHTML = '<p class="muted">Loading…</p>';
+    try {
+        const { orders } = await api('/api/orders', { auth: true });
+        if (!orders.length) { list.innerHTML = '<p class="muted">No orders yet.</p>'; return; }
+        list.innerHTML = orders.map(o => `
+            <div class="order-card">
+                <div class="order-head"><strong>Order #${o.id}</strong><span class="order-date">${new Date(o.created_at).toLocaleDateString()}</span></div>
+                <div class="order-items">${o.items.map(it => `<div class="order-line"><img src="${it.image}" alt=""><span>${it.name} × ${it.quantity}</span><strong>${fmt(it.price * it.quantity)}</strong></div>`).join('')}</div>
+                <div class="order-foot"><span>Total</span><strong>${fmt(o.total)}</strong></div>
+            </div>
+        `).join('');
+    } catch (e) { list.innerHTML = `<p class="text-danger">${e.message}</p>`; }
 }
 
 // ---------- Reveal animations ----------
@@ -417,18 +404,13 @@ let revealObserver;
 function observeReveals() {
     if (!revealObserver) {
         revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in-view');
-                    revealObserver.unobserve(entry.target);
-                }
-            });
+            entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in-view'); revealObserver.unobserve(entry.target); } });
         }, { threshold: 0.12 });
     }
     $$('.reveal:not(.in-view)').forEach(el => revealObserver.observe(el));
 }
 
-// ---------- Navbar / smooth scroll / back-to-top ----------
+// ---------- Navbar / scroll / back-to-top ----------
 function bindNav() {
     const navbar = $('#navbar');
     const backBtn = $('#backToTop');
@@ -440,10 +422,7 @@ function bindNav() {
     $$('a[href^="#"]').forEach(a => {
         a.addEventListener('click', e => {
             const id = a.getAttribute('href');
-            if (id.length > 1) {
-                const el = document.querySelector(id);
-                if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-            }
+            if (id.length > 1) { const el = document.querySelector(id); if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
         });
     });
 }
@@ -460,5 +439,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCart();
     loadBlog();
 
-    // Token verification skipped — no backend available on static hosting
+    if (state.token) {
+        try { const { user } = await api('/api/auth/me', { auth: true }); saveAuth(state.token, user); }
+        catch { logout(); }
+    }
 });

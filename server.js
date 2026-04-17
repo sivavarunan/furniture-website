@@ -3,23 +3,40 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'furnifrenzy-dev-secret-change-me';
-const JWT_EXPIRES = '7d';
+const JWT_SECRET = process.env.JWT_SECRET || 'furnifrenzy-secret-change-in-prod';
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
-
-// Static frontend
-app.use(express.static(__dirname, { extensions: ['html'] }));
+app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'page.html')));
+
+// ---------- Static data ----------
+const PRODUCTS = [
+    { id: 1, name: 'Modern Lounge Chair', slug: 'modern-lounge-chair', description: 'A contemporary lounge chair with plush upholstery and solid oak legs. Designed for unmatched comfort and style.', price: 220.00, old_price: 280.00, image: 'pic2.png', tag: 'New', rating: 4.6, rating_count: 128, stock: 24, category: 'Chairs' },
+    { id: 2, name: 'Designer Accent Chair', slug: 'designer-accent-chair', description: 'Statement-making accent chair with sculpted curves and premium fabric upholstery.', price: 185.00, old_price: 219.00, image: 'pic3.png', tag: 'Sale', rating: 5.0, rating_count: 94, stock: 18, category: 'Chairs' },
+    { id: 3, name: 'Premium Wooden Chair', slug: 'premium-wooden-chair', description: 'Solid wood frame, ergonomic profile, and a timeless silhouette that fits any room.', price: 249.00, old_price: null, image: 'pic4.png', tag: 'Hot', rating: 4.2, rating_count: 62, stock: 12, category: 'Chairs' },
+];
+
+const BLOG_POSTS = [
+    { id: 1, title: 'First Time Home Owner Ideas', slug: 'first-time-home-owner-ideas', excerpt: 'Essentials for setting up your first place with style and comfort.', image: 'pic6.jpg', category: 'Inspiration', author: 'Kristin Watson', published_at: '2021-12-19' },
+    { id: 2, title: 'How To Keep Your Furniture Clean', slug: 'how-to-keep-furniture-clean', excerpt: 'Practical tips to maintain your furniture and extend its lifespan.', image: 'pic7.jpg', category: 'Guide', author: 'Robert Fox', published_at: '2021-12-15' },
+    { id: 3, title: 'Small Space Furniture Apartment Ideas', slug: 'small-space-apartment-ideas', excerpt: 'Smart layouts and dual-purpose pieces for compact living.', image: 'pic8.jpg', category: 'Tips', author: 'Kristin Watson', published_at: '2021-12-12' },
+];
+
+// ---------- In-memory stores ----------
+const users = [];
+const orders = [];
+const newsletter = new Set();
+const contacts = [];
+let nextUserId = 1;
+let nextOrderId = 1;
 
 // ---------- Helpers ----------
 function signToken(user) {
-    return jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+    return jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 function authRequired(req, res, next) {
@@ -29,7 +46,7 @@ function authRequired(req, res, next) {
     try {
         req.user = jwt.verify(token, JWT_SECRET);
         next();
-    } catch (e) {
+    } catch {
         return res.status(401).json({ error: 'Invalid or expired token' });
     }
 }
@@ -39,26 +56,26 @@ function isEmail(s) {
 }
 
 // ---------- Auth ----------
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
     const { name, email, password } = req.body || {};
     if (!name || !isEmail(email) || !password || password.length < 6) {
         return res.status(400).json({ error: 'Name, valid email and password (min 6 chars) are required.' });
     }
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) return res.status(409).json({ error: 'An account with this email already exists.' });
-
-    const hash = bcrypt.hashSync(password, 10);
-    const result = db.prepare('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)').run(name.trim(), email.toLowerCase(), hash);
-    const user = { id: result.lastInsertRowid, name: name.trim(), email: email.toLowerCase() };
-    res.json({ token: signToken(user), user });
+    if (users.find(u => u.email === email.toLowerCase())) {
+        return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
+    const hash = await bcrypt.hash(password, 10);
+    const user = { id: nextUserId++, name: name.trim(), email: email.toLowerCase(), password_hash: hash };
+    users.push(user);
+    const safe = { id: user.id, name: user.name, email: user.email };
+    res.json({ token: signToken(safe), user: safe });
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body || {};
     if (!isEmail(email) || !password) return res.status(400).json({ error: 'Email and password are required.' });
-
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase());
-    if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    const user = users.find(u => u.email === email.toLowerCase());
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
         return res.status(401).json({ error: 'Invalid email or password.' });
     }
     const safe = { id: user.id, name: user.name, email: user.email };
@@ -66,43 +83,30 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.get('/api/auth/me', authRequired, (req, res) => {
-    const user = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?').get(req.user.id);
+    const user = users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ user });
+    res.json({ user: { id: user.id, name: user.name, email: user.email } });
 });
 
 // ---------- Products ----------
-app.get('/api/products', (req, res) => {
-    const products = db.prepare('SELECT * FROM products ORDER BY id ASC').all();
-    res.json({ products });
-});
-
+app.get('/api/products', (req, res) => res.json({ products: PRODUCTS }));
 app.get('/api/products/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+    const product = PRODUCTS.find(p => p.id === Number(req.params.id));
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json({ product });
 });
 
 // ---------- Blog ----------
-app.get('/api/blog', (req, res) => {
-    const posts = db.prepare('SELECT * FROM blog_posts ORDER BY published_at DESC').all();
-    res.json({ posts });
-});
+app.get('/api/blog', (req, res) => res.json({ posts: BLOG_POSTS }));
 
 // ---------- Newsletter ----------
 app.post('/api/newsletter', (req, res) => {
     const { email } = req.body || {};
     if (!isEmail(email)) return res.status(400).json({ error: 'A valid email is required.' });
-    try {
-        db.prepare('INSERT INTO newsletter (email) VALUES (?)').run(email.toLowerCase());
-        res.json({ ok: true, message: 'Subscribed! Check your inbox for a 10% off code.' });
-    } catch (e) {
-        if (String(e.message).includes('UNIQUE')) {
-            return res.json({ ok: true, message: "You're already subscribed — thanks!" });
-        }
-        res.status(500).json({ error: 'Something went wrong.' });
-    }
+    const lower = email.toLowerCase();
+    if (newsletter.has(lower)) return res.json({ ok: true, message: "You're already subscribed — thanks!" });
+    newsletter.add(lower);
+    res.json({ ok: true, message: 'Subscribed! Check your inbox for a 10% off code.' });
 });
 
 // ---------- Contact ----------
@@ -111,79 +115,42 @@ app.post('/api/contact', (req, res) => {
     if (!name || !isEmail(email) || !message) {
         return res.status(400).json({ error: 'Name, valid email and message are required.' });
     }
-    db.prepare('INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)')
-        .run(name.trim(), email.toLowerCase(), (subject || '').trim(), message.trim());
+    contacts.push({ name: name.trim(), email: email.toLowerCase(), subject: (subject || '').trim(), message: message.trim(), created_at: new Date().toISOString() });
     res.json({ ok: true, message: "Thanks! We'll get back to you shortly." });
 });
 
 // ---------- Orders ----------
 app.post('/api/orders', authRequired, (req, res) => {
     const { items, shipping } = req.body || {};
-    if (!Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ error: 'Cart is empty.' });
-    }
-    if (!shipping || !shipping.name || !shipping.address || !shipping.city || !shipping.zip) {
+    if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'Cart is empty.' });
+    if (!shipping?.name || !shipping?.address || !shipping?.city || !shipping?.zip) {
         return res.status(400).json({ error: 'Complete shipping details are required.' });
     }
-
-    const productStmt = db.prepare('SELECT id, name, price, stock FROM products WHERE id = ?');
-    const decStock = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?');
-    const insertOrder = db.prepare(`
-        INSERT INTO orders (user_id, total, shipping_name, shipping_address, shipping_city, shipping_zip)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    const insertItem = db.prepare(`
-        INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)
-    `);
-
-    try {
-        const result = db.transaction(() => {
-            let total = 0;
-            const validated = [];
-            for (const item of items) {
-                const pid = Number(item.id);
-                const qty = Math.max(1, Number(item.quantity) || 1);
-                const product = productStmt.get(pid);
-                if (!product) throw new Error(`Product ${pid} not found`);
-                if (product.stock < qty) throw new Error(`${product.name} is out of stock`);
-                validated.push({ product, qty });
-                total += product.price * qty;
-            }
-            const orderRes = insertOrder.run(
-                req.user.id, total,
-                shipping.name.trim(), shipping.address.trim(),
-                shipping.city.trim(), shipping.zip.trim()
-            );
-            const orderId = orderRes.lastInsertRowid;
-            for (const v of validated) {
-                insertItem.run(orderId, v.product.id, v.qty, v.product.price);
-                const r = decStock.run(v.qty, v.product.id, v.qty);
-                if (r.changes === 0) throw new Error(`${v.product.name} is out of stock`);
-            }
-            return { orderId, total };
-        })();
-        res.json({ ok: true, orderId: result.orderId, total: result.total, message: 'Order placed successfully!' });
-    } catch (e) {
-        res.status(400).json({ error: e.message || 'Could not place order.' });
+    let total = 0;
+    const orderItems = [];
+    for (const item of items) {
+        const product = PRODUCTS.find(p => p.id === Number(item.id));
+        if (!product) return res.status(400).json({ error: `Product ${item.id} not found` });
+        const qty = Math.max(1, Number(item.quantity) || 1);
+        total += product.price * qty;
+        orderItems.push({ product_id: product.id, name: product.name, image: product.image, quantity: qty, price: product.price });
     }
+    const order = { id: nextOrderId++, user_id: req.user.id, total, items: orderItems, shipping, status: 'pending', created_at: new Date().toISOString() };
+    orders.push(order);
+    res.json({ ok: true, orderId: order.id, total: order.total });
 });
 
 app.get('/api/orders', authRequired, (req, res) => {
-    const orders = db.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC').all(req.user.id);
-    const itemStmt = db.prepare(`
-        SELECT oi.*, p.name, p.image FROM order_items oi
-        JOIN products p ON p.id = oi.product_id
-        WHERE oi.order_id = ?
-    `);
-    for (const o of orders) o.items = itemStmt.all(o.id);
-    res.json({ orders });
+    const userOrders = orders.filter(o => o.user_id === req.user.id).reverse();
+    res.json({ orders: userOrders });
 });
 
 // ---------- 404 for API ----------
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 // ---------- Start ----------
-app.listen(PORT, () => {
-    console.log(`\n  FurniFrenzy server running`);
-    console.log(`  → http://localhost:${PORT}\n`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`\n  FurniFrenzy running → http://localhost:${PORT}\n`));
+}
+
+module.exports = app;
